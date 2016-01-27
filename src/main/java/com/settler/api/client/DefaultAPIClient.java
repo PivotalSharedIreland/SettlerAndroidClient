@@ -26,18 +26,7 @@ public class DefaultAPIClient extends Binder implements APIClient {
     public List<Property> listProperties() throws IOException {
         Call<List<Property>> call = apiService.listProperties();
         return call.execute().body();
-
-//        List<Property> properties = new ArrayList<>(2);
-//        Property property = new Property();
-//        property.setId(1L);
-//        properties.add(property);
-//        Property property2 = new Property();
-//        property2.setId(1L);
-//        properties.add(property2);
-//        return properties;
     }
-
-
 
 
 }
