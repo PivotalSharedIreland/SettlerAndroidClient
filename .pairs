@@ -2,7 +2,9 @@
 # place in project or home directory
 pairs:
   bh: Bengt Hammarlund
+  fm: Fabio Mangione
   ks: Konstantin Semenov
+
 email:
   prefix: pair
   domain: pivotallabs.com

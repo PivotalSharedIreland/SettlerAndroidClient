@@ -9,7 +9,7 @@ import retrofit2.http.GET;
 
 public interface APIService {
 
-    @GET("properties")
+    @GET("/properties")
     Call<List<Property>> listProperties();
 
 }

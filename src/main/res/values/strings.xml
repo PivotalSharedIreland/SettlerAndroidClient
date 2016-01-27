@@ -1,3 +1,4 @@
 <resources>
+    <string name="app_title">Settler</string>
     <string name="label_text">Hello Espresso!</string>
 </resources>

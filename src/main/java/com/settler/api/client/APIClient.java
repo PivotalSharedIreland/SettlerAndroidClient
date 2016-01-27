@@ -1,7 +1,15 @@
 package com.settler.api.client;
 
-/**
- * Created by pivotal on 26/01/2016.
- */
-public interface APIClient {
+
+import android.os.IBinder;
+
+import com.settler.api.Property;
+
+import java.io.IOException;
+import java.util.List;
+
+public interface APIClient extends IBinder {
+
+    List<Property> listProperties() throws IOException;
+
 }

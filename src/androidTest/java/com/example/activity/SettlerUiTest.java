@@ -1,10 +1,10 @@
 package com.example.activity;
 
-import com.example.R;
-
 import android.support.test.rule.ActivityTestRule;
-import android.test.ActivityInstrumentationTestCase2;
 import android.test.suitebuilder.annotation.LargeTest;
+
+import com.settler.MainActivity;
+import com.settler.R;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -15,14 +15,13 @@ import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
 
 @LargeTest
-public class DeckardEspressoTest  {
+public class SettlerUiTest {
 
     @Rule
-    public ActivityTestRule<MainActivity> mActivityRule =
-            new ActivityTestRule<>(MainActivity.class);
+    public ActivityTestRule<MainActivity> mActivityRule = new ActivityTestRule<>(MainActivity.class);
 
     @Test
-    public void testActivityShouldHaveText() throws InterruptedException {
+    public void showPropertiesList() throws InterruptedException {
         onView(withId(R.id.textView)).check(matches(withText("Hello Espresso!")));
     }
 }

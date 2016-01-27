@@ -1,16 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example"
+    package="com.settler"
     android:versionCode="2"
     android:versionName="1.0.0-SNAPSHOT">
 
-    <application android:name=".DeckardApplication">
-        <activity android:name=".activity.MainActivity">
+    <uses-sdk
+        android:maxSdkVersion="23"
+        android:minSdkVersion="15"
+        android:targetSdkVersion="21" />
+
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <application android:name="com.settler.SettlerApplication" android:label="@string/app_title">
+
+        <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <service android:name=".api.client.SettlerAPIService">
+            <intent-filter>
+                <action android:name="settler.intent.action.LIST_PROPERTIES" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </service>
+
     </application>
 
 </manifest>
