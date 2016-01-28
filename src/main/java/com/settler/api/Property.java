@@ -23,10 +23,10 @@ public class Property implements Parcelable {
         this.address = address;
     }
 
-        @Override
-        public int describeContents() {
-            return 0;
-        }
+    @Override
+    public int describeContents() {
+        return 0;
+    }
 
     @Override
     public void writeToParcel(Parcel out, int flags) {
@@ -49,5 +49,30 @@ public class Property implements Parcelable {
         }
     };
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
 
+        Property property = (Property) o;
+
+        if (id != null ? !id.equals(property.id) : property.id != null) return false;
+        return !(address != null ? !address.equals(property.address) : property.address != null);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id != null ? id.hashCode() : 0;
+        result = 31 * result + (address != null ? address.hashCode() : 0);
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "Property{" +
+                "id=" + id +
+                ", address='" + address + '\'' +
+                '}';
+    }
 }

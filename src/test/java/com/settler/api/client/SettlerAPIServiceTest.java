@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Parcelable;
-import android.support.annotation.NonNull;
 import android.support.v4.content.LocalBroadcastManager;
 
 import com.google.inject.AbstractModule;
@@ -13,6 +12,7 @@ import com.settler.BuildConfig;
 import com.settler.Constants;
 import com.settler.PropertyListReceiver;
 import com.settler.SettlerApplication;
+import com.settler.api.ApiBaseTest;
 import com.settler.api.Property;
 
 import org.junit.After;
@@ -23,9 +23,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.annotation.Config;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import roboguice.RoboGuice;
 
@@ -41,7 +38,7 @@ import static org.robolectric.Robolectric.buildService;
 
 @RunWith(RobolectricGradleTestRunner.class)
 @Config(constants = BuildConfig.class, sdk = 21)
-public class SettlerAPIServiceTest {
+public class SettlerAPIServiceTest extends ApiBaseTest {
 
     private APIClient serviceMock = Mockito.mock(APIClient.class);
     private PropertyListReceiver propertyListReceiver = Mockito.mock(PropertyListReceiver.class);
@@ -83,24 +80,6 @@ public class SettlerAPIServiceTest {
         assertTrue(parcelables.length == 2);
         assertTrue(((Property) parcelables[0]).getId() == 1L);
     }
-
-    @NonNull
-    private List<Property> getProperties() {
-        List<Property> properties = new ArrayList<>(2);
-        Property object = buildProperty(1L, "Address 1");
-        properties.add(object);
-        properties.add(new Property());
-        return properties;
-    }
-
-    @NonNull
-    private Property buildProperty(Long id, String address) {
-        Property object = new Property();
-        object.setId(id);
-        object.setAddress(address);
-        return object;
-    }
-
 
     public class MyTestModule extends AbstractModule {
         @Override

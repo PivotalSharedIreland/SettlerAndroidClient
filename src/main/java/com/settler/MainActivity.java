@@ -85,9 +85,7 @@ public class MainActivity extends RoboActivity implements PropertyListReceiver {
 
     @Override
     public void updatePropertyList(Property[] properties) {
-
         textView.setText("Obtained " + properties.length + " results");
         Log.d(LOG_TAG, "Obtained " + properties + " results");
-
     }
 }
