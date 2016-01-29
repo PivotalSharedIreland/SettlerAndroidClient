@@ -3,9 +3,8 @@ package com.settler;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcelable;
-import android.util.Log;
+import android.widget.ListAdapter;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import com.settler.api.ApiBaseTest;
 import com.settler.api.events.PropertiesAvailableEvent;
@@ -30,7 +29,6 @@ import static com.settler.Constants.IntentFilterKeys.PROPERTIES_LIST_REQUEST;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
-import static org.mockito.Mockito.mock;
 
 @RunWith(RobolectricGradleTestRunner.class)
 @Config(constants = BuildConfig.class, sdk = 21)
@@ -60,14 +58,9 @@ public class MainActivityTest extends ApiBaseTest {
 
         final Bundle bundle = getMockedBundle(1);
 
-        ActivityController<MainActivity> activityController = Robolectric.buildActivity(MainActivity.class).create(bundle);
+        ActivityController<MainActivity> activityController = Robolectric.buildActivity(MainActivity.class).create(bundle).start().resume();
 
         MainActivity mainActivity = activityController.get();
-        activityController.start();
-
-        assertNull(Shadows.shadowOf(mainActivity).getNextStartedService());
-
-        activityController.resume();
 
         assertNull(Shadows.shadowOf(mainActivity).getNextStartedService());
     }
@@ -115,14 +108,8 @@ public class MainActivityTest extends ApiBaseTest {
     @Test
     public void handleNewPropertyList() throws Exception {
 
-        ActivityController<MainActivity> activityController = Robolectric.buildActivity(MainActivity.class).create();
-        MainActivity mainActivity = activityController.get();
-
-        activityController.start();
-
-//        assertEquals(((TextView) mainActivity.findViewById(R.id.listView)).getText(), "Hello Espresso!");
-
-        activityController.resume();
+        ActivityController<MainActivity> activityController = Robolectric.buildActivity(MainActivity.class);
+        final MainActivity mainActivity = activityController.create().start().resume().get();
 
         //fake Service eventBus post
         final PropertiesAvailableEvent event = new PropertiesAvailableEvent(buildPropertiesList(2));
@@ -135,7 +122,8 @@ public class MainActivityTest extends ApiBaseTest {
     private Callable<Integer> propertiesReceived(final MainActivity mainActivity) {
         return new Callable<Integer>() {
             public Integer call() throws Exception {
-                return ((ListView) mainActivity.findViewById(R.id.listView)).getAdapter().getCount();
+                ListAdapter adapter = ((ListView) mainActivity.findViewById(R.id.listView)).getAdapter();
+                return adapter == null ? 0 : adapter.getCount();
             }
         };
     }

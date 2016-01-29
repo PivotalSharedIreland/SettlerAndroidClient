@@ -19,6 +19,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import roboguice.activity.RoboActivity;
+import roboguice.adapter.IterableAdapter;
 import roboguice.inject.ContentView;
 import roboguice.inject.InjectView;
 
@@ -35,24 +36,22 @@ public class MainActivity extends RoboActivity {
     private Bus eventBus;
 
     @InjectView(R.id.listView)
-    private ListView listView;
+    ListView listView;
 
     private List<Property> properties;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
         if (savedInstanceState != null) {
             final Property[] propertiesArray = (Property[]) savedInstanceState.getParcelableArray(PROPERTIES_LIST);
             if (propertiesArray != null && propertiesArray.length > 0) {
                 properties = Arrays.asList(propertiesArray);
+                listView.setAdapter(new ArrayAdapter<>(this, R.layout.property_list_item, R.id.property_address, properties));
             }
         }
 
-
-        listView.setAdapter(new ArrayAdapter<Property>(this, ));
-
-        super.onCreate(savedInstanceState);
     }
 
     @Override
@@ -99,5 +98,6 @@ public class MainActivity extends RoboActivity {
 //        listView.setText(text);
         Log.d(LOG_TAG, text);
         properties = event.getProperties();
+        listView.setAdapter(new ArrayAdapter<>(this, R.layout.property_list_item, R.id.property_address, properties));
     }
 }

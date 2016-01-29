@@ -46,7 +46,8 @@ public class ApiBaseTest {
     public Property[] buildPropertiesArray(int numberOfProperties) {
         final Property[] properties = new Property[numberOfProperties];
         for (int i = 0; i < numberOfProperties; i++) {
-            properties[i] = buildProperty(Long.valueOf(i), "Address " + i);
+            int id = i + 1;
+            properties[i] = buildProperty(Long.valueOf(id), "Address " + id);
         }
         return properties;
     }
