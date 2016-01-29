@@ -1,19 +1,14 @@
 package com.settler.api.client;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.os.Parcelable;
-import android.support.v4.content.LocalBroadcastManager;
 
 import com.google.inject.AbstractModule;
 import com.settler.BuildConfig;
-import com.settler.Constants;
-import com.settler.PropertyListReceiver;
 import com.settler.SettlerApplication;
 import com.settler.api.ApiBaseTest;
-import com.settler.api.Property;
+import com.settler.api.events.MainThreadBus;
+import com.settler.api.events.PropertiesAvailableEvent;
+import com.squareup.otto.Bus;
 
 import org.junit.After;
 import org.junit.Before;
@@ -27,9 +22,8 @@ import org.robolectric.annotation.Config;
 import roboguice.RoboGuice;
 
 import static com.settler.Constants.IntentFilterKeys.PROPERTIES_LIST_REQUEST;
-import static com.settler.Constants.IntentFilterKeys.PROPERTIES_LIST_RESULT;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -40,12 +34,16 @@ import static org.robolectric.Robolectric.buildService;
 @Config(constants = BuildConfig.class, sdk = 21)
 public class SettlerAPIServiceTest extends ApiBaseTest {
 
-    private APIClient serviceMock = Mockito.mock(APIClient.class);
-    private PropertyListReceiver propertyListReceiver = Mockito.mock(PropertyListReceiver.class);
+    private APIClient apiClientMock;
+
+    private Bus eventBus;
 
     @Before
     public void setup() {
         // Override the default RoboGuice module
+
+        apiClientMock = Mockito.mock(APIClient.class);
+        eventBus = Mockito.mock(MainThreadBus.class);
         RoboGuice.overrideApplicationInjector(SettlerApplication.getApplication(), new MyTestModule());
     }
 
@@ -60,31 +58,29 @@ public class SettlerAPIServiceTest extends ApiBaseTest {
 
         SettlerAPIService service = buildService(SettlerAPIService.class).create().get();
 
-        when(serviceMock.listProperties()).thenReturn(getProperties());
+        when(apiClientMock.listProperties()).thenReturn(buildPropertiesList(2));
 
         Intent intent = new Intent(PROPERTIES_LIST_REQUEST);
         intent.setPackage(SettlerApplication.getApplication().getPackageName());
 
-        LocalBroadcastManager instance = LocalBroadcastManager.getInstance(SettlerApplication.getApplication());
-        ArgumentCaptor<Intent> argumentCaptor = ArgumentCaptor.forClass(Intent.class);
-        BroadcastReceiver receiver = mock(BroadcastReceiver.class);
-        instance.registerReceiver(receiver, new IntentFilter(PROPERTIES_LIST_RESULT));
+        ArgumentCaptor<PropertiesAvailableEvent> argumentCaptor = ArgumentCaptor.forClass(PropertiesAvailableEvent.class);
 
         service.onHandleIntent(intent);
 
-        verify(serviceMock, times(1)).listProperties();
-        verify(receiver, times(1)).onReceive(any(Context.class), argumentCaptor.capture());
+        verify(apiClientMock, times(1)).listProperties();
+        verify(eventBus, times(1)).post(argumentCaptor.capture());
 
-        Intent receivedIntent = argumentCaptor.getValue();
-        Parcelable[] parcelables = receivedIntent.getParcelableArrayExtra(Constants.ExtrasKeys.PROPERTIES_LIST);
-        assertTrue(parcelables.length == 2);
-        assertTrue(((Property) parcelables[0]).getId() == 1L);
+        PropertiesAvailableEvent receivedIntent = argumentCaptor.getValue();
+        assertTrue(receivedIntent.getProperties().size() == 2);
+        assertEquals(receivedIntent.getProperties().get(0).getId().longValue(), 1L);
     }
 
     public class MyTestModule extends AbstractModule {
         @Override
         protected void configure() {
-            bind(APIClient.class).toInstance(serviceMock);
+            bind(APIClient.class).toInstance(apiClientMock);
+            bind(Bus.class).toInstance(eventBus);
         }
     }
+
 }

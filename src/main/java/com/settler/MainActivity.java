@@ -1,91 +1,103 @@
 package com.settler;
 
-import android.content.BroadcastReceiver;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
-import android.os.PersistableBundle;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
-import android.widget.TextView;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
+import android.widget.ListView;
 
-import com.settler.api.ApiBroadcastReceiver;
+import com.google.inject.Inject;
 import com.settler.api.Property;
+import com.settler.api.events.PropertiesAvailableEvent;
+import com.squareup.otto.Bus;
+import com.squareup.otto.Subscribe;
+
+import java.util.Arrays;
+import java.util.List;
 
 import roboguice.activity.RoboActivity;
 import roboguice.inject.ContentView;
 import roboguice.inject.InjectView;
 
 import static com.settler.Constants.ExtrasKeys.PROPERTIES_LIST;
-import static com.settler.Constants.IntentFilterKeys.PROPERTIES_LIST_RESULT;
+import static com.settler.Constants.IntentFilterKeys.PROPERTIES_LIST_REQUEST;
 import static com.settler.Constants.ResultCodes.PROPERTIES_LIST_OBTAINED;
 
 @ContentView(R.layout.activity_main)
-public class MainActivity extends RoboActivity implements PropertyListReceiver {
+public class MainActivity extends RoboActivity {
 
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
 
-    private BroadcastReceiver propertyListReceiver;
+    @Inject
+    private Bus eventBus;
 
-    @InjectView(R.id.textView)
-    private TextView textView;
+    @InjectView(R.id.listView)
+    private ListView listView;
+
+    private List<Property> properties;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        if (savedInstanceState != null) {
+            final Property[] propertiesArray = (Property[]) savedInstanceState.getParcelableArray(PROPERTIES_LIST);
+            if (propertiesArray != null && propertiesArray.length > 0) {
+                properties = Arrays.asList(propertiesArray);
+            }
+        }
+
+
+        listView.setAdapter(new ArrayAdapter<Property>(this, ));
+
         super.onCreate(savedInstanceState);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        //register receiver
-        registerBroadcastReceivers();
-        obtainPropertyList();
+        eventBus.register(this);
+        if (properties == null) {
+            obtainPropertyList();
+        }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        //unregister receiver
-        unregisterReceivers();
+        eventBus.unregister(this);
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
-        super.onSaveInstanceState(outState, outPersistentState);
-        //TODO implement it!!!!!!!
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (properties != null) {
+            outState.putParcelableArray(PROPERTIES_LIST, properties.toArray(new Property[properties.size()]));
+        }
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == PROPERTIES_LIST_OBTAINED) {
-            textView.setText("Obtained " + data.getParcelableArrayExtra(PROPERTIES_LIST).length + " results");
+//            listView.setText("Obtained " + data.getParcelableArrayExtra(PROPERTIES_LIST).length + " results");
             Log.d(LOG_TAG, "Obtained " + data.getParcelableArrayExtra(PROPERTIES_LIST) + " results");
         }
     }
 
     private void obtainPropertyList() {
-        Intent intent = new Intent("settler.intent.action.LIST_PROPERTIES");
+        Intent intent = new Intent(PROPERTIES_LIST_REQUEST);
         intent.setPackage(getPackageName());
         startService(intent);
     }
 
-    private void registerBroadcastReceivers() {
-        final IntentFilter filter = new IntentFilter(PROPERTIES_LIST_RESULT);
-        propertyListReceiver = new ApiBroadcastReceiver(this);
-        propertyListReceiver.setOrderedHint(true);
-
-        LocalBroadcastManager.getInstance(this).registerReceiver(propertyListReceiver, filter);
-    }
-
-    private void unregisterReceivers() {
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(propertyListReceiver);
-    }
-
-    @Override
-    public void updatePropertyList(Property[] properties) {
-        textView.setText("Obtained " + properties.length + " results");
-        Log.d(LOG_TAG, "Obtained " + properties + " results");
+    @Subscribe
+    public void propertiesAvailable(final PropertiesAvailableEvent event) {
+        String text = "Obtained " + event.getProperties().size() + " results";
+//        listView.setText(text);
+        Log.d(LOG_TAG, text);
+        properties = event.getProperties();
     }
 }

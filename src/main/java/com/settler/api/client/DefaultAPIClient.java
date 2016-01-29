@@ -18,7 +18,10 @@ public class DefaultAPIClient extends Binder implements APIClient {
     private final String url = "http://settler.cfapps.io";
 
     public DefaultAPIClient() {
-        retrofit = new Retrofit.Builder().baseUrl(url).addConverterFactory(GsonConverterFactory.create()).build();
+        retrofit = new Retrofit.Builder()
+                .baseUrl(url)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
         apiService = retrofit.create(APIService.class);
     }
 
@@ -27,6 +30,5 @@ public class DefaultAPIClient extends Binder implements APIClient {
         Call<List<Property>> call = apiService.listProperties();
         return call.execute().body();
     }
-
 
 }

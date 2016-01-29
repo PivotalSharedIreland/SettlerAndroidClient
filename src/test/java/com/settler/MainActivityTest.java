@@ -1,16 +1,18 @@
 package com.settler;
 
 import android.content.Intent;
+import android.os.Bundle;
+import android.os.Parcelable;
+import android.util.Log;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.settler.api.ApiBaseTest;
-import com.settler.api.Property;
-import com.settler.api.client.APIClient;
+import com.settler.api.events.PropertiesAvailableEvent;
 
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.Shadows;
@@ -20,22 +22,23 @@ import org.robolectric.util.ActivityController;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
+import edu.emory.mathcs.backport.java.util.Arrays;
+
 import static com.jayway.awaitility.Awaitility.await;
+import static com.settler.Constants.ExtrasKeys.PROPERTIES_LIST;
 import static com.settler.Constants.IntentFilterKeys.PROPERTIES_LIST_REQUEST;
 import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
+import static org.mockito.Mockito.mock;
 
 @RunWith(RobolectricGradleTestRunner.class)
 @Config(constants = BuildConfig.class, sdk = 21)
 public class MainActivityTest extends ApiBaseTest {
 
-    private APIClient serviceMock = Mockito.mock(APIClient.class);
-
     @Test
-    //TODO after handling state, test it having the list and not having the list on savedState
-    public void startServiceOnStart() throws Exception {
-        ActivityController<MainActivity> activityController = Robolectric.buildActivity(MainActivity.class).create();
+    public void startServiceOnResume() throws Exception {
+        ActivityController<MainActivity> activityController = Robolectric.buildActivity(MainActivity.class).create(null);
 
         MainActivity mainActivity = activityController.get();
         activityController.start();
@@ -50,6 +53,66 @@ public class MainActivityTest extends ApiBaseTest {
     }
 
     @Test
+    /**
+     * Should not start the service on onResume when a previous list of properties was recently downloaded
+     */
+    public void shouldNotStartServicePreviousStateNotEmpty() throws Exception {
+
+        final Bundle bundle = getMockedBundle(1);
+
+        ActivityController<MainActivity> activityController = Robolectric.buildActivity(MainActivity.class).create(bundle);
+
+        MainActivity mainActivity = activityController.get();
+        activityController.start();
+
+        assertNull(Shadows.shadowOf(mainActivity).getNextStartedService());
+
+        activityController.resume();
+
+        assertNull(Shadows.shadowOf(mainActivity).getNextStartedService());
+    }
+
+    @Test
+    public void shouldSaveStateWithNotNull() {
+
+        //Starts the activity with no state
+        final ActivityController<MainActivity> activityController = Robolectric.buildActivity(MainActivity.class);
+        final MainActivity mainActivity = activityController.get();
+
+        activityController.create().start().resume();
+
+        //fake Service eventBus post
+        final PropertiesAvailableEvent event = new PropertiesAvailableEvent(buildPropertiesList(2));
+        mainActivity.propertiesAvailable(event);
+        activityController.visible().get(); //lifecycle complete
+
+        //pause the activity
+        final Bundle bundle = new Bundle();
+        activityController.pause().saveInstanceState(bundle);
+
+        Parcelable[] parcelableArray = bundle.getParcelableArray(PROPERTIES_LIST);
+        assertNotNull(parcelableArray);
+        assertEquals(event.getProperties(), Arrays.asList(parcelableArray));
+
+    }
+
+    @Test
+    public void shouldNotSaveStateNull() {
+
+        //Starts the activity with no state
+        final ActivityController<MainActivity> activityController = Robolectric.buildActivity(MainActivity.class);
+        final MainActivity mainActivity = activityController.create().start().resume().visible().get();
+
+        //pause the activity
+        final Bundle bundle = new Bundle();
+        activityController.pause().saveInstanceState(bundle);
+
+        Parcelable[] parcelableArray = bundle.getParcelableArray(PROPERTIES_LIST);
+        assertNull(parcelableArray);
+
+    }
+
+    @Test
     public void handleNewPropertyList() throws Exception {
 
         ActivityController<MainActivity> activityController = Robolectric.buildActivity(MainActivity.class).create();
@@ -57,19 +120,22 @@ public class MainActivityTest extends ApiBaseTest {
 
         activityController.start();
 
-        assertEquals(((TextView) mainActivity.findViewById(R.id.textView)).getText(), "Hello Espresso!");
+//        assertEquals(((TextView) mainActivity.findViewById(R.id.listView)).getText(), "Hello Espresso!");
 
         activityController.resume();
 
-        //fake broadcastReceiver response
-        mainActivity.updatePropertyList(new Property[]{new Property(), new Property()});
-        await().atMost(5, TimeUnit.SECONDS).until(propertiesReceived(mainActivity), CoreMatchers.equalTo("Obtained 2 results"));
+        //fake Service eventBus post
+        final PropertiesAvailableEvent event = new PropertiesAvailableEvent(buildPropertiesList(2));
+        mainActivity.propertiesAvailable(event);
+
+        await().atMost(5, TimeUnit.SECONDS).until(propertiesReceived(mainActivity), CoreMatchers.equalTo(Integer.valueOf(2)));
+
     }
 
-    private Callable<String> propertiesReceived(final MainActivity mainActivity) {
-        return new Callable<String>() {
-            public String call() throws Exception {
-                return ((TextView) mainActivity.findViewById(R.id.textView)).getText().toString();
+    private Callable<Integer> propertiesReceived(final MainActivity mainActivity) {
+        return new Callable<Integer>() {
+            public Integer call() throws Exception {
+                return ((ListView) mainActivity.findViewById(R.id.listView)).getAdapter().getCount();
             }
         };
     }

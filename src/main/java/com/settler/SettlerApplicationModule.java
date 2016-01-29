@@ -4,6 +4,8 @@ import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.settler.api.client.APIClient;
 import com.settler.api.client.DefaultAPIClient;
+import com.settler.api.events.MainThreadBus;
+import com.squareup.otto.Bus;
 
 public class SettlerApplicationModule implements Module {
 
@@ -11,5 +13,6 @@ public class SettlerApplicationModule implements Module {
     public void configure(Binder binder) {
         binder.bind(APIClient.class).to(DefaultAPIClient.class);
         binder.bind(Foo.class).to(FooImpl.class);
+        binder.bind(Bus.class).to(MainThreadBus.class).asEagerSingleton();
     }
 }
