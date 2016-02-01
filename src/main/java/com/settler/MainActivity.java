@@ -3,10 +3,6 @@ package com.settler;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.BaseAdapter;
 import android.widget.ListView;
 
 import com.google.inject.Inject;
@@ -19,7 +15,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import roboguice.activity.RoboActivity;
-import roboguice.adapter.IterableAdapter;
 import roboguice.inject.ContentView;
 import roboguice.inject.InjectView;
 
@@ -48,7 +43,7 @@ public class MainActivity extends RoboActivity {
             final Property[] propertiesArray = (Property[]) savedInstanceState.getParcelableArray(PROPERTIES_LIST);
             if (propertiesArray != null && propertiesArray.length > 0) {
                 properties = Arrays.asList(propertiesArray);
-                listView.setAdapter(new ArrayAdapter<>(this, R.layout.property_list_item, R.id.property_address, properties));
+                listView.setAdapter(new PropertyListAdapter(this, properties));
             }
         }
 
@@ -81,7 +76,6 @@ public class MainActivity extends RoboActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == PROPERTIES_LIST_OBTAINED) {
-//            listView.setText("Obtained " + data.getParcelableArrayExtra(PROPERTIES_LIST).length + " results");
             Log.d(LOG_TAG, "Obtained " + data.getParcelableArrayExtra(PROPERTIES_LIST) + " results");
         }
     }
@@ -95,9 +89,8 @@ public class MainActivity extends RoboActivity {
     @Subscribe
     public void propertiesAvailable(final PropertiesAvailableEvent event) {
         String text = "Obtained " + event.getProperties().size() + " results";
-//        listView.setText(text);
         Log.d(LOG_TAG, text);
         properties = event.getProperties();
-        listView.setAdapter(new ArrayAdapter<>(this, R.layout.property_list_item, R.id.property_address, properties));
+        listView.setAdapter(new PropertyListAdapter(this, properties));
     }
 }

@@ -1,11 +1,12 @@
 package com.settler.api.client;
 
 import android.content.Intent;
+import android.os.Build;
 
 import com.google.inject.AbstractModule;
 import com.settler.BuildConfig;
 import com.settler.SettlerApplication;
-import com.settler.api.ApiBaseTest;
+import com.settler.PropertyBaseTest;
 import com.settler.api.events.MainThreadBus;
 import com.settler.api.events.PropertiesAvailableEvent;
 import com.squareup.otto.Bus;
@@ -24,15 +25,14 @@ import roboguice.RoboGuice;
 import static com.settler.Constants.IntentFilterKeys.PROPERTIES_LIST_REQUEST;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.robolectric.Robolectric.buildService;
 
 @RunWith(RobolectricGradleTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = 21)
-public class SettlerAPIServiceTest extends ApiBaseTest {
+@Config(constants = BuildConfig.class, sdk = Build.VERSION_CODES.LOLLIPOP)
+public class SettlerAPIServiceTest extends PropertyBaseTest {
 
     private APIClient apiClientMock;
 

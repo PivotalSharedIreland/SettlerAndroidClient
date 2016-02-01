@@ -1,12 +1,12 @@
 package com.settler;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 
-import com.settler.api.ApiBaseTest;
 import com.settler.api.events.PropertiesAvailableEvent;
 
 import org.hamcrest.CoreMatchers;
@@ -31,8 +31,8 @@ import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
 
 @RunWith(RobolectricGradleTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = 21)
-public class MainActivityTest extends ApiBaseTest {
+@Config(constants = BuildConfig.class, sdk = Build.VERSION_CODES.LOLLIPOP)
+public class MainActivityTest extends PropertyBaseTest {
 
     @Test
     public void startServiceOnResume() throws Exception {
@@ -94,7 +94,7 @@ public class MainActivityTest extends ApiBaseTest {
 
         //Starts the activity with no state
         final ActivityController<MainActivity> activityController = Robolectric.buildActivity(MainActivity.class);
-        final MainActivity mainActivity = activityController.create().start().resume().visible().get();
+        activityController.create().start().resume().visible().get();
 
         //pause the activity
         final Bundle bundle = new Bundle();

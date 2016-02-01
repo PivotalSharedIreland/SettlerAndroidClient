@@ -1,11 +1,10 @@
-package com.settler.api;
+package com.settler;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 
-import com.settler.Constants;
+import com.settler.api.Property;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -15,7 +14,7 @@ import static org.mockito.Mockito.when;
 /**
  * Created by pivotal on 27/01/2016.
  */
-public class ApiBaseTest {
+public class PropertyBaseTest {
 
     @NonNull
     public List<Property> buildPropertiesList(int numberOfProperties) {

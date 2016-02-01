@@ -1,6 +1,7 @@
 package com.settler.api;
 
 
+import android.os.Build;
 import android.os.Parcel;
 
 import com.settler.BuildConfig;
@@ -13,7 +14,7 @@ import org.robolectric.annotation.Config;
 import static junit.framework.Assert.assertEquals;
 
 @RunWith(RobolectricGradleTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = 21)
+@Config(constants = BuildConfig.class, sdk = Build.VERSION_CODES.LOLLIPOP)
 public class PropertyTest {
 
     @Test

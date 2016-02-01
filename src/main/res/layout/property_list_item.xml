@@ -4,40 +4,43 @@
                 android:layout_height="?android:attr/listPreferredItemHeight"
                 android:layout_margin="?android:attr/listPreferredItemPaddingStart"
 
->
+    >
 
     <TextView
-        android:id="@+id/property_id"
+        android:id="@id/property_id"
         style="@style/TextAppearance.AppCompat.Large"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="123"
+        android:layout_alignParentStart="true"
         android:layout_centerVertical="true"
-        android:layout_alignParentStart="true"/>
+        android:text="123"/>
 
     <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
+        android:layout_alignParentRight="true"
+        android:layout_marginLeft="@dimen/activity_horizontal_margin"
         android:layout_toRightOf="@id/property_id"
-        android:gravity="right"
-        android:layout_alignParentRight="true">
+        android:gravity="left">
+
         <TextView
+            android:id="@id/address_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Address:"
-            android:id="@+id/address_label"
+            android:layout_alignLeft="@id/property_address"
             android:layout_alignParentTop="true"
-            android:layout_alignStart="@+id/property_address"/>
+            android:text="@string/address_label"/>
+
         <TextView
-            android:id="@+id/property_address"
+            android:id="@id/property_address"
             style="@style/TextAppearance.AppCompat.Large"
-            android:textStyle="bold"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="right|bottom"
-            android:text="Address 1"
-            android:layout_below="@+id/address_label"
-            android:layout_alignParentEnd="true"/>
+            android:layout_alignParentStart="true"
+            android:layout_below="@id/address_label"
+            android:gravity="left|bottom"
+            android:text="Add"
+            android:textStyle="bold"/>
 
     </RelativeLayout>
 </RelativeLayout>
