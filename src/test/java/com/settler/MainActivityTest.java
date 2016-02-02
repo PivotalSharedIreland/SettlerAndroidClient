@@ -4,9 +4,12 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.support.v7.widget.RecyclerView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 
+import com.settler.api.Property;
 import com.settler.api.events.PropertiesAvailableEvent;
 
 import org.hamcrest.CoreMatchers;
@@ -18,6 +21,7 @@ import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
 import org.robolectric.util.ActivityController;
 
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
@@ -112,18 +116,39 @@ public class MainActivityTest extends PropertyBaseTest {
         final MainActivity mainActivity = activityController.create().start().resume().get();
 
         //fake Service eventBus post
-        final PropertiesAvailableEvent event = new PropertiesAvailableEvent(buildPropertiesList(2));
+        List<Property> properties = buildPropertiesList(2);
+        properties.get(0).setAddress("New Address");
+        final PropertiesAvailableEvent event = new PropertiesAvailableEvent(properties);
         mainActivity.propertiesAvailable(event);
 
         await().atMost(5, TimeUnit.SECONDS).until(propertiesReceived(mainActivity), CoreMatchers.equalTo(Integer.valueOf(2)));
+        await().atMost(5, TimeUnit.SECONDS).until(propertiesReceivedTitle(mainActivity), CoreMatchers.equalTo("New Address"));
+
+
+        //get event bus
+        //post an PropertiesAvailableEvent
+        //assert that the activity handled it (1 * propertiesAvailable)
 
     }
 
     private Callable<Integer> propertiesReceived(final MainActivity mainActivity) {
         return new Callable<Integer>() {
             public Integer call() throws Exception {
-                ListAdapter adapter = ((ListView) mainActivity.findViewById(R.id.listView)).getAdapter();
-                return adapter == null ? 0 : adapter.getCount();
+                RecyclerView.Adapter adapter = ((RecyclerView) mainActivity.findViewById(R.id.recyclerView)).getAdapter();
+                return adapter == null ? 0 : adapter.getItemCount();
+            }
+        };
+    }
+
+    private Callable<String> propertiesReceivedTitle(final MainActivity mainActivity) {
+        return new Callable<String>() {
+            public String call() throws Exception {
+                RecyclerView recyclerView = (RecyclerView) mainActivity.findViewById(R.id.recyclerView);
+                RecyclerView.Adapter adapter = recyclerView.getAdapter();
+                RecyclerView.ViewHolder viewHolder = adapter.createViewHolder(recyclerView, 0);
+                adapter.bindViewHolder(viewHolder, 0);
+                TextView address = ((TextView)viewHolder.itemView.findViewById(R.id.property_address));
+                return address == null ? null : address.getText().toString();
             }
         };
     }

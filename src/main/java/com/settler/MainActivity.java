@@ -2,6 +2,8 @@ package com.settler;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.widget.ListView;
 
@@ -30,8 +32,8 @@ public class MainActivity extends RoboActivity {
     @Inject
     private Bus eventBus;
 
-    @InjectView(R.id.listView)
-    ListView listView;
+    @InjectView(R.id.recyclerView)
+    RecyclerView recyclerView;
 
     private List<Property> properties;
 
@@ -43,10 +45,9 @@ public class MainActivity extends RoboActivity {
             final Property[] propertiesArray = (Property[]) savedInstanceState.getParcelableArray(PROPERTIES_LIST);
             if (propertiesArray != null && propertiesArray.length > 0) {
                 properties = Arrays.asList(propertiesArray);
-                listView.setAdapter(new PropertyListAdapter(this, properties));
+                recyclerView.setAdapter(new PropertyRecyclerViewAdapter(properties));
             }
         }
-
     }
 
     @Override
@@ -91,6 +92,7 @@ public class MainActivity extends RoboActivity {
         String text = "Obtained " + event.getProperties().size() + " results";
         Log.d(LOG_TAG, text);
         properties = event.getProperties();
-        listView.setAdapter(new PropertyListAdapter(this, properties));
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setAdapter(new PropertyRecyclerViewAdapter(properties));
     }
 }
