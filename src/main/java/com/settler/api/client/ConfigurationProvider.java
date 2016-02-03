@@ -1,7 +1,17 @@
 package com.settler.api.client;
 
-/**
- * Created by pivotal on 03/02/2016.
- */
-public class ConfigurationProvider {
+import android.util.Log;
+
+import com.settler.BuildConfig;
+
+public class ConfigurationProvider implements HttpConfigurationProvider {
+    public ConfigurationProvider() {
+        Log.d("ConfigurationProvider","I ran!!!");
+
+    }
+
+    @Override
+    public String getBaseURL() {
+        return BuildConfig.base_url;
+    }
 }
